@@ -1,0 +1,52 @@
+#!/bin/sh
+
+python3 git_fit.py
+
+#cardio
+#  jumping jacks
+#  high knees
+#
+#upper body
+#  push ups
+#  dips
+#  bench press
+#
+#back
+#  pull ups
+#    muscle ups
+#
+#legs
+#  squats
+#    with weights
+#    pistol squats
+#  lunges
+#    with weights
+#    reverse/forwards
+#
+#core
+#  planks
+#  side planks
+#  mountain climbers
+#  bridge
+#  crunches
+#  leg raises
+#
+#full body
+#  burpees
+#  stretching
+#
+#cooldown - x min between sets
+#
+#randomly cycle through categories - should hit all categories before repeating
+#randomly cycle through exercises within each category - should hit all before repeating
+#
+#suggest number of reps
+#prompt for actual reps done
+#
+#record category, exercise, timestamp, number of reps
+#
+#set of remaining categories
+#set of remaining exercises per category
+#
+#when empty : start over + shuffle
+
