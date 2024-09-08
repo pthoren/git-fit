@@ -1,0 +1,41 @@
+{
+  "cooldown": {
+    "days": 0,
+    "hours": 0,
+    "minutes": 30
+  },
+  "routine": "RandomCycle",
+  "categories": {
+    "chest": [
+      "push ups",
+      "dips",
+      "bench presses"
+    ],
+    "legs": [
+      "squats",
+      "forward lunges",
+      "reverse lunges"
+    ],
+    "back": [
+      "pull ups",
+      "rows"
+    ],
+    "core": [
+      "plank",
+      "side plank",
+      "bridge",
+      "crunches",
+      "leg raises"
+    ],
+    "stretches": [
+      "toe touches",
+      "cat-cow poses",
+      "child's pose"
+    ],
+    "cardio": [
+      "jumping jacks",
+      "mountain climbers",
+      "high knees"
+    ]
+  }
+}
