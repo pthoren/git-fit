@@ -2,9 +2,54 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 import json
 import random
+import os
+import csv
+import sys
+import subprocess
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List, Dict
+
+@dataclass
+class Log:
+    file_path: str = 'log.csv'
+    headers: List[str] = field(default_factory=lambda: ['timestamp', 'category', 'exercise', 'reps'])
+
+    def __post_init__(self):
+        # Ensure the file exists and has the correct headers
+        if not os.path.exists(self.file_path):
+            self._initialize_log_file()
+
+    def _initialize_log_file(self):
+        # Initialize the CSV file with the correct headers
+        with open(self.file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(self.headers)
+
+    def record(self, category: str, exercise: str, reps: int):
+        # Create a new log entry with the current timestamp
+        new_entry = [datetime.now().strftime('%Y-%m-%d %H:%M:%S'), category, exercise, str(reps)]
+
+        # Read the existing log
+        with open(self.file_path, mode='r') as file:
+            existing_entries = list(csv.reader(file))
+
+        # Insert the new entry at the beginning
+        updated_entries = [existing_entries[0]] + [new_entry] + existing_entries[1:]
+
+        # Write the updated log back to the file
+        with open(self.file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(updated_entries)
+
+    def load_log(self) -> List[List[str]]:
+        # Load the log from CSV
+        if os.path.exists(self.file_path):
+            with open(self.file_path, mode='r') as file:
+                return list(csv.reader(file))
+        else:
+            print("Log file not found.")
+            return []
 
 class Routine(ABC):
     @abstractmethod
@@ -12,7 +57,7 @@ class Routine(ABC):
         pass
 
     @abstractmethod
-    def record(self):
+    def record(self, category: str, exercise: str):
         pass
 
 
@@ -22,17 +67,53 @@ class Cooldown:
     hours: int
     minutes: int
 
+    def check(self, last_executed: str):
+        if not last_executed:
+            return True
+        else:
+            last_executed_dt = datetime.fromisoformat(last_executed)
+            duration = timedelta(**self.__dict__)
+            return last_executed_dt < datetime.now() - duration
+
 @dataclass
 class Config:
     cooldown: Cooldown
     routine: Routine
     categories: Dict[str, List[str]]
 
+    def save(self, file_path: str) -> None:
+        with open(file_path, 'w') as file:
+            json.dump(asdict(self), file, indent=4)
+
+    @staticmethod
+    def load():
+        with open('config.json', 'r') as file:
+            config = json.load(file)
+
+        cooldown = Cooldown(**config['cooldown'])
+        routine = globals()[config['routine']]()
+
+        return Config(cooldown=cooldown, routine=routine, categories=config['categories'])
+
+
 @dataclass
 class State:
     remaining_categories: List[str]
     remaining_exercises: Dict[str, List[str]]
     last_executed: str = ""
+
+    def save(self) -> None:
+        with open('.state.json', 'w') as file:
+            json.dump(asdict(self), file, indent=4)
+
+    @staticmethod
+    def load(config: Config):
+        try:
+            with open(".state.json", 'r') as file:
+                state_dict = json.load(file)
+                return State(**state_dict)
+        except FileNotFoundError:
+            return State(remaining_categories=list(config.categories.keys()), remaining_exercises=config.categories)
 
 class RandomCycle(Routine):
     def next_exercise(self, config: Config, state: State) -> str:
@@ -48,55 +129,36 @@ class RandomCycle(Routine):
 
         return category, exercise
 
-    def record(self):
-        return super().save()
+    def record(self, category, exercise):
+        return super().record(category, exercise)
 
 class FourDaySplit(Routine):
     def next_exercise(self) -> str:
         return super().get_next_exercise()
-    def record(self):
-        return super().save()
 
-def load_config(path: str = 'config.json') -> Config:
-    with open(path, 'r') as f:
-        config = json.load(f)
-
-    cooldown = Cooldown(**config['cooldown'])
-
-    routine: Routine = globals()[config['routine']]()
-
-    return Config(cooldown=cooldown, routine=routine, categories=config['categories'])
-
-def load_state(config: Config) -> State:
-    try:
-        with open(".state.json", 'r') as file:
-            state_dict = json.load(file)
-            return State(**state_dict)
-    except FileNotFoundError:
-        return State(remaining_categories=list(config.categories.keys()), remaining_exercises=config.categories)
-
-def check_cooldown(cooldown: Cooldown, last_executed: str) -> bool:
-  if not last_executed:
-      return True
-  else:
-      last_executed_dt = datetime.fromisoformat(last_executed)
-      duration = timedelta(**cooldown.__dict__)
-      return last_executed_dt < datetime.now() - duration
-
-def get_exercise(config: Config, state: State) -> str:
-    return "exercise"
+    def record(self, category, exercise):
+        return super().record(category, exercise)
 
 def main():
-    config = load_config()
-    state = load_state(config)
+    config = Config.load()
+    state = State.load(config)
+    log = Log()
 
-    if not check_cooldown(config.cooldown, state.last_executed):
+    if not config.cooldown.check(state.last_executed):
         print("cooldown")
         return
 
     routine = config.routine
+    print('Routine:', routine.__class__.__name__)
     category, exercise = routine.next_exercise(config, state)
-    print(f"{category}: {exercise}")
+    print(f"Category: {category}")
+    print(f"Exercise: {exercise}")
+    print ('--')
+
+    reps = int(input("How many reps did you do?: "))
+    if (reps > 0):
+        routine.record(category, exercise)
+        log.record(category, exercise, reps)
 
 if __name__ == "__main__":
     main()
