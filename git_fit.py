@@ -9,6 +9,8 @@ import json
 import os
 import random
 
+# config: silence when late at night?
+
 @dataclass
 class ExerciseLog:
     file_path: str = 'log.csv'
@@ -68,7 +70,7 @@ class State:
 
 class Routine(ABC):
     @abstractmethod
-    def next_exercise(self) -> str:
+    def next_exercise(self, config, state: State, skipped_categories: List[str]) -> str:
         pass
 
     @abstractmethod
@@ -106,7 +108,9 @@ class Config:
         return Config(cooldown=cooldown, routine=routine, categories=config['categories'])
 
 class RandomCycle(Routine):
-    def next_exercise(self, config: Config, state: State) -> str:
+    def next_exercise(self, config: Config, state: State, skipped_categories: List[str]) -> str:
+        state.remaining_categories = [cat for cat in state.remaining_categories if cat not in skipped_categories]
+
         if len(state.remaining_categories) == 0:
             state.remaining_categories = list(config.categories.keys())
 
@@ -140,20 +144,34 @@ def main():
         print("cooldown")
         return
 
-    routine = config.routine
-    print('Routine:', routine.__class__.__name__)
-    category, exercise = routine.next_exercise(config, state)
-    print(f"Category: {category}")
-    print(f"Exercise: {exercise}")
-    print ('--')
+    skipped_categories = []
 
-    reps = int(input("How many reps did you do?: "))
-    if (reps > 0):
-        routine.record(state, category, exercise)
-        log.record(category, exercise, reps)
-        state.save()
-        print('Remaining categories:', state.remaining_categories)
-        print('Remaining exercises:', state.remaining_exercises[category])
+    while True:
+        routine = config.routine
+        print('Routine:', routine.__class__.__name__)
+        category, exercise = routine.next_exercise(config, state, skipped_categories)
+        print(f"Category: {category}")
+        print(f"Exercise: {exercise}")
+        print ('--')
+
+        value = input("How many reps did you do? (0 = skip, c = change category): ")
+        if (value == 'c'):
+            print('Changing category')
+            skipped_categories.append(category)
+            continue
+        elif (value == '0'):
+            print('Skipping this time.')
+            return
+        else:
+            reps = int(value)
+            if (reps > 0):
+                routine.record(state, category, exercise)
+                log.record(category, exercise, reps)
+                state.save()
+                print('Remaining categories:', state.remaining_categories)
+                print('Remaining exercises:', state.remaining_exercises[category])
+                return
+        reps = int(input("How many reps did you do? (0 = skip, c = change category): "))
 
 if __name__ == "__main__":
     main()
