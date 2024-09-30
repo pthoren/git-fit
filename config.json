@@ -4,6 +4,10 @@
     "hours": 0,
     "minutes": 30
   },
+  "workout_hours": {
+    "start": 9,
+    "end": 18
+  },
   "routine": "RandomCycle",
   "categories": {
     "chest": [
