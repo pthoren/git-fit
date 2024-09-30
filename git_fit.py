@@ -111,7 +111,7 @@ class Routine(ABC):
         pass
 
     @abstractmethod
-    def record(self, state: State, category: str, exercise: str, reps: float):
+    def record(self, state: State, category: str, exercise: str, reps: int):
         pass
 
 def main():
@@ -142,7 +142,7 @@ def main():
         print(f"Exercise: {exercise}")
         print ('--')
 
-        value = input("How many reps did you do? (0 = skip, c = change category): ")
+        value = input("How many reps did you do? (0: skip, c: change category): ")
         if (value == 'c'):
             print('Changing category')
             skipped_categories.append(category)
@@ -153,7 +153,7 @@ def main():
         else:
             reps = int(value)
             if (reps > 0):
-                routine.record(state, category, exercise)
+                routine.record(state, category, exercise, reps)
                 log.record(category, exercise, reps)
                 state.save()
                 print('Remaining categories:', state.remaining_categories)
