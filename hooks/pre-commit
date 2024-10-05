@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# get current directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+sh "$DIR/run-local-hook" pre-commit
+
+# check if this works from vscode commit pane
+exec >/dev/tty 2>/dev/tty </dev/tty
+python3 git_fit.py

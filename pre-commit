@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# check if this works from vscode commit pane
-exec >/dev/tty 2>/dev/tty </dev/tty
-python3 git_fit.py
