@@ -1,10 +1,19 @@
 #!/bin/sh
 
-# get current directory
+IS_AMEND=$(ps -ocommand= -p $PPID | grep -e '--amend');
+
+if [ -n "$IS_AMEND" ]; then
+  # skip amended commits
+  exit 0;
+fi
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+echo "Running pre-commit hook"
 sh "$DIR/run-local-hook" pre-commit
 
-# check if this works from vscode commit pane
+# TODO check if this works from vscode commit pane
 exec >/dev/tty 2>/dev/tty </dev/tty
+cd "$DIR"
+cd ..
 python3 git_fit.py
