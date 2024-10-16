@@ -2,7 +2,7 @@
   "cooldown": {
     "days": 0,
     "hours": 0,
-    "minutes": 30
+    "minutes": 60
   },
   "workout_hours": {
     "start": 9,
