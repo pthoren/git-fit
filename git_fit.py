@@ -23,9 +23,6 @@ class Cooldown:
             duration = timedelta(**self.__dict__)
             return last_executed_dt < datetime.now() - duration
 
-
-# config: silence when late at night?
-
 @dataclass
 class Config:
     cooldown: Cooldown
@@ -58,7 +55,6 @@ class ExerciseLog:
             self._initialize_log_file()
 
     def _initialize_log_file(self):
-        # Initialize the CSV file with the correct headers
         with open(self.file_path, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(self.headers)
@@ -85,7 +81,6 @@ class ExerciseLog:
             print("Log file not found.")
             return []
 
-
 @dataclass
 class State:
     remaining_categories: List[str]
@@ -107,7 +102,7 @@ class State:
 
 class Routine(ABC):
     @abstractmethod
-    def next_exercise(self, config: Config, state: State, skipped_categories: List[str]) -> str:
+    def next_exercise(self, config: Config, state: State, skipped_categories: List[str], skipped_exercises: List[str]) -> str:
         pass
 
     @abstractmethod
@@ -134,6 +129,7 @@ def main():
     routine = RoutineClass()
 
     skipped_categories = []
+    skipped_exercises = []
 
     while True:
         print('Routine:', routine.__class__.__name__)
@@ -142,10 +138,14 @@ def main():
         print(f"Exercise: {exercise}")
         print ('--')
 
-        value = input("How many reps did you do? (0: skip, c: change category): ")
+        value = input("How many reps did you do? (0: skip, c: change category, e: change exercise): ")
         if (value == 'c'):
             print('Changing category')
             skipped_categories.append(category)
+            continue
+        if (value == 'e'):
+            print('Changing exercise')
+            skipped_exercises.append(exercise)
             continue
         elif (value == '0'):
             print('Skipping this time.')
@@ -159,7 +159,6 @@ def main():
                 print('Remaining categories:', state.remaining_categories)
                 print('Remaining exercises:', state.remaining_exercises[category])
                 return
-        reps = int(input("How many reps did you do? (0 = skip, c = change category): "))
 
 if __name__ == "__main__":
     main()
