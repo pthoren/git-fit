@@ -81,6 +81,13 @@ class ExerciseLog:
             print("Log file not found.")
             return []
 
+    def previous_set(self, exercise: str) -> List[str]:
+        log = self.load_log()
+        for row in log:
+            if row[2] == exercise:
+                return row
+        return []
+
 @dataclass
 class State:
     remaining_categories: List[str]
@@ -134,8 +141,11 @@ def main():
     while True:
         print('Routine:', routine.__class__.__name__)
         category, exercise = routine.next_exercise(config, state, skipped_categories, skipped_exercises)
+        previous_set = log.previous_set(exercise)
         print(f"Category: {category}")
         print(f"Exercise: {exercise}")
+        if previous_set:
+            print(f"Last time you did: {previous_set[3]} reps")
         print ('--')
 
         value = input("How many reps did you do? (0: skip, c: change category, e: change exercise): ")
