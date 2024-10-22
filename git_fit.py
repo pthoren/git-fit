@@ -133,7 +133,7 @@ def main():
 
     while True:
         print('Routine:', routine.__class__.__name__)
-        category, exercise = routine.next_exercise(config, state, skipped_categories)
+        category, exercise = routine.next_exercise(config, state, skipped_categories, skipped_exercises)
         print(f"Category: {category}")
         print(f"Exercise: {exercise}")
         print ('--')
