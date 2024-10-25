@@ -22,6 +22,7 @@
     ],
     "back": [
       "pull ups",
+      "chin ups",
       "rows"
     ],
     "core": [
@@ -31,15 +32,15 @@
       "crunches",
       "leg raises"
     ],
-    "stretches": [
-      "toe touches",
-      "cat-cow poses",
-      "child's pose"
-    ],
     "cardio": [
       "jumping jacks",
       "mountain climbers",
       "high knees"
+    ],
+    "stretches": [
+      "toe touches",
+      "down dog",
+      "child's pose"
     ]
   }
 }
