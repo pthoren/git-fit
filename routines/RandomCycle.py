@@ -9,15 +9,21 @@ class RandomCycle(Routine):
         if len(state.remaining_categories) == 0:
             state.remaining_categories = list(config.categories.keys())
 
+        last_skipped_category = skipped_categories[-1] if skipped_categories else None
         category = random.choice(state.remaining_categories)
+        while (category == last_skipped_category and len(state.remaining_categories) > 1):
+            category = random.choice(state.remaining_categories)
 
         state.remaining_exercises[category] = [ex for ex in state.remaining_exercises[category] if ex not in skipped_exercises]
 
         if len(state.remaining_exercises[category]) == 0:
             state.remaining_exercises[category] = config.categories[category]
 
+        last_skipped_exercise = skipped_exercises[-1] if skipped_exercises else None
         exercises = state.remaining_exercises[category]
         exercise = random.choice(exercises)
+        while (exercise == last_skipped_exercise and len(exercises) > 1):
+            exercise = random.choice(exercises)
 
         return category, exercise
 
