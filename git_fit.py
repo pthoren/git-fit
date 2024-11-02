@@ -152,6 +152,7 @@ def main():
         if (value == 'c'):
             print('Changing category')
             skipped_categories.append(category)
+            category = None
             continue
         if (value == 'e'):
             print('Changing exercise')
