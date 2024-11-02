@@ -148,7 +148,7 @@ def main():
             print(f"Last time you did: {previous_set[3]} reps")
         print ('--')
 
-        value = input("How many reps did you do? (0: skip, c: change category, e: change exercise): ")
+        value = input("How many reps did you do? (s: skip, c: change category, e: change exercise): ")
         if (value == 'c'):
             print('Changing category')
             skipped_categories.append(category)
@@ -157,18 +157,22 @@ def main():
             print('Changing exercise')
             skipped_exercises.append(exercise)
             continue
-        elif (value == '0'):
+        elif (value == 's' or value == '0'):
             print('Skipping this time.')
             return
         else:
-            reps = int(value)
-            if (reps > 0):
-                routine.record(state, category, exercise, reps)
-                log.record(category, exercise, reps)
-                state.save()
-                print('Remaining categories:', state.remaining_categories)
-                print('Remaining exercises:', state.remaining_exercises[category])
-                return
+            try:
+                reps = int(value)
+                if (reps > 0):
+                    routine.record(state, category, exercise, reps)
+                    log.record(category, exercise, reps)
+                    state.save()
+                    print('Remaining categories:', state.remaining_categories)
+                    print('Remaining exercises:', state.remaining_exercises[category])
+                    return
+            except:
+                pass
+
 
 if __name__ == "__main__":
     main()
