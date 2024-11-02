@@ -109,8 +109,7 @@ class State:
 
 class Routine(ABC):
     @abstractmethod
-    def next_exercise(self, config: Config, state: State, skipped_categories: List[str], skipped_exercises: List[str]) -> str:
-        pass
+    def next_exercise(self, config: Config, state: State, skipped_categories: List[str], skipped_exercises: List[str], category: str = None) -> str:  pass
 
     @abstractmethod
     def record(self, state: State, category: str, exercise: str, reps: int):
@@ -137,10 +136,11 @@ def main():
 
     skipped_categories = []
     skipped_exercises = []
+    category = None
 
     while True:
         print('Routine:', routine.__class__.__name__)
-        category, exercise = routine.next_exercise(config, state, skipped_categories, skipped_exercises)
+        category, exercise = routine.next_exercise(config, state, skipped_categories, skipped_exercises, category)
         previous_set = log.previous_set(exercise)
         print(f"Category: {category}")
         print(f"Exercise: {exercise}")
