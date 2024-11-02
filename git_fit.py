@@ -95,6 +95,7 @@ class State:
     last_executed: str = ""
 
     def save(self) -> None:
+        self.last_executed = datetime.now().isoformat()
         with open('.state.json', 'w') as file:
             json.dump(asdict(self), file, indent=4)
 
