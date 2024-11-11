@@ -3,11 +3,15 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
+import platform
+import subprocess
+from time import sleep
 import importlib
 from typing import List, Dict
 import csv
 import json
 import os
+
 
 @dataclass
 class Cooldown:
@@ -28,6 +32,7 @@ class Config:
     cooldown: Cooldown
     workout_hours_start: int
     workout_hours_end: int
+    exercise_duration: int
     routine: str
     categories: Dict[str, List[str]]
 
@@ -42,6 +47,7 @@ class Config:
             cooldown=cooldown,
             workout_hours_start=config['workout_hours']['start'],
             workout_hours_end=config['workout_hours']['end'],
+            exercise_duration=config['exercise_duration'],
             routine=config['routine'],
             categories=config['categories'])
 
@@ -149,7 +155,7 @@ def main():
             print(f"Last time you did: {previous_set[3]} reps")
         print ('--')
 
-        value = input("How many reps did you do? (s: skip, c: change category, e: change exercise): ")
+        value = input("Continue? (y: yes, c: change category, e: change exercise,  s: skip): ").lower()
         if (value == 'c'):
             print('Changing category')
             skipped_categories.append(category)
@@ -162,19 +168,65 @@ def main():
         elif (value == 's' or value == '0'):
             print('Skipping this time.')
             return
-        else:
-            try:
-                reps = int(value)
-                if (reps > 0):
-                    routine.record(state, category, exercise, reps)
-                    log.record(category, exercise, reps)
-                    state.save()
-                    print('Remaining categories:', state.remaining_categories)
-                    print('Remaining exercises:', state.remaining_exercises[category])
-                    return
-            except:
-                pass
+        elif (value == 'y' or value == '1'):
+            duration = config.exercise_duration
 
+            speak_text(f"Starting in 10 seconds")
+            sleep(5)
+            speak_text("Five")
+            speak_text("Four")
+            speak_text("Three")
+            speak_text("Two")
+            speak_text("One")
+            speak_text("Begin")
+
+            sleep(duration)
+
+            speak_text("Time's up")
+
+            while True:
+                value = input("How many reps did you do?: ").lower()
+                try:
+                    reps = int(value)
+                    if reps > 0:
+                        routine.record(state, category, exercise, reps)
+                        log.record(category, exercise, reps)
+                        state.save()
+
+                        remaining_exercises = state.remaining_exercises[category]
+                        if len(remaining_exercises) == 0:
+                            print(f'All exercises completed in category {category}!')
+                            # print stats
+                        else:
+                            print(f'Remaining exercises in category {category}: {remaining_exercises}')
+
+                        if len(state.remaining_categories) == 0:
+                            print('All categories completed!!!!')
+                            # print stats
+                        else:
+                            print('Remaining categories:', state.remaining_categories)
+                    return
+                except ValueError:
+                    pass
+
+def speak_text(text):
+    system = platform.system()
+
+    print(text)
+
+    if system == "Darwin":  # macOS
+        subprocess.run(["say", text])
+
+    elif system == "Windows":  # Windows
+        subprocess.run([
+            "powershell",
+            "-Command",
+            f"Add-Type –AssemblyName System.speech; "
+            f"(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('{text}')"
+        ])
+
+    elif system == "Linux":  # Linux
+        subprocess.run(["espeak", text])
 
 if __name__ == "__main__":
     main()
