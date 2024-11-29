@@ -91,6 +91,19 @@ class ExerciseLog:
         sets = [row for row in log if row[2] == exercise]
         return sets[:5]
 
+    def previous_cycle(self, categories: List[str]) -> List[List[str]]:
+        log = self.load_log()
+        categories_set = set(categories)
+        cycle = []
+        for row in log:
+            cycle.append(row)
+            category = row[1]
+            if category in categories_set:
+                categories_set.remove(category)
+            if len(categories_set) == 0:
+                break
+        return cycle
+
 @dataclass
 class State:
     remaining_categories: List[str]
@@ -206,14 +219,16 @@ def main():
                         remaining_exercises = state.remaining_exercises[category]
                         if len(remaining_exercises) == 0 and len(skipped_exercises) == 0:
                             print(f'All exercises completed in category {category}!')
-
                             # print stats
                         else:
                             print(f'Remaining exercises in category {category}: {remaining_exercises}')
 
                         if len(state.remaining_categories) == 0 and len(skipped_categories) == 0:
-                            print('All categories completed!!!!')
-                            # print stats
+                            print('All categories completed!')
+                            print('This cycle you did:')
+                            cycle = log.previous_cycle(config.categories)
+                            for set in cycle:
+                                print(f'{set[0]} {set[3]}')
                         else:
                             print('Remaining categories:', state.remaining_categories)
                     return
