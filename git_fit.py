@@ -12,7 +12,6 @@ import csv
 import json
 import os
 
-
 @dataclass
 class Cooldown:
     days: int
@@ -87,12 +86,10 @@ class ExerciseLog:
             print("Log file not found.")
             return []
 
-    def previous_set(self, exercise: str) -> List[str]:
+    def previous_sets(self, exercise: str) -> List[List[str]]:
         log = self.load_log()
-        for row in log:
-            if row[2] == exercise:
-                return row
-        return []
+        sets = [row for row in log if row[2] == exercise]
+        return sets[:5]
 
 @dataclass
 class State:
@@ -132,7 +129,7 @@ def main():
         return
 
     current_hour = datetime.now().hour
-    if current_hour <= config.workout_hours_start or current_hour >= config.workout_hours_end:
+    if current_hour < config.workout_hours_start or current_hour >= config.workout_hours_end:
         print("off hours")
         return
 
@@ -148,11 +145,11 @@ def main():
     while True:
         print('Routine:', routine.__class__.__name__)
         category, exercise = routine.next_exercise(config, state, skipped_categories, skipped_exercises, category)
-        previous_set = log.previous_set(exercise)
+        previous_sets = log.previous_sets(exercise)
         print(f"Category: {category}")
         print(f"Exercise: {exercise}")
-        if previous_set:
-            print(f"Last time you did: {previous_set[3]} reps")
+        if previous_sets:
+            print(f"Last time you did: {previous_sets[0][3]} reps")
         print ('--')
 
         value = input("Continue? (y: yes, c: change category, e: change exercise,  s: skip): ").lower()
@@ -178,9 +175,17 @@ def main():
             speak_text("Three")
             speak_text("Two")
             speak_text("One")
-            speak_text("Begin")
+            speak_text("Go")
 
-            sleep(duration)
+            if (duration >= 45):
+                sleep(duration - 30)
+                speak_text("Thirty seconds remaining")
+                sleep(15)
+            else:
+                sleep(duration - 15)
+
+            speak_text("Fifteen seconds remaining")
+            sleep(15)
 
             speak_text("Time's up")
 
@@ -193,14 +198,20 @@ def main():
                         log.record(category, exercise, reps)
                         state.save()
 
+                        if (previous_sets):
+                            print(f'{exercise} history')
+                            for set in previous_sets:
+                                print(f'{set[0]} {set[3]}')
+
                         remaining_exercises = state.remaining_exercises[category]
-                        if len(remaining_exercises) == 0:
+                        if len(remaining_exercises) == 0 and len(skipped_exercises) == 0:
                             print(f'All exercises completed in category {category}!')
+
                             # print stats
                         else:
                             print(f'Remaining exercises in category {category}: {remaining_exercises}')
 
-                        if len(state.remaining_categories) == 0:
+                        if len(state.remaining_categories) == 0 and len(skipped_categories) == 0:
                             print('All categories completed!!!!')
                             # print stats
                         else:
