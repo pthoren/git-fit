@@ -12,6 +12,8 @@ import csv
 import json
 import os
 
+DEBUG = False
+
 @dataclass
 class Cooldown:
     days: int
@@ -210,17 +212,18 @@ def main():
                         routine.record(state, category, exercise, reps)
                         log.record(category, exercise, reps)
                         state.save()
-
-                        if (previous_sets):
-                            print(f'{exercise} history')
-                            for set in previous_sets:
-                                print(f'{set[0]} {set[3]}')
+                        previous_sets = log.previous_sets()
+                        print("")
+                        print(f'{exercise} history')
+                        for set in previous_sets:
+                            print(f'{set[0]} {set[3]}')
 
                         remaining_exercises = state.remaining_exercises[category]
                         if len(remaining_exercises) == 0 and len(skipped_exercises) == 0:
                             print(f'All exercises completed in category {category}!')
                             # print stats
-                        else:
+
+                        if DEBUG:
                             print(f'Remaining exercises in category {category}: {remaining_exercises}')
 
                         if len(state.remaining_categories) == 0 and len(skipped_categories) == 0:
@@ -229,8 +232,8 @@ def main():
                             cycle = log.previous_cycle(config.categories)
                             for set in cycle:
                                 print(f'{set[0]} {set[3]}')
-                        else:
-                            print('Remaining categories:', state.remaining_categories)
+
+                        print('Remaining categories in cycle:', state.remaining_categories.join(", "))
                     return
                 except ValueError:
                     pass
