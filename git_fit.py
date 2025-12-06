@@ -31,11 +31,11 @@ class Cooldown:
 @dataclass
 class Config:
     cooldown: Cooldown
-    workout_hours_start: int
-    workout_hours_end: int
-    exercise_duration: int
+    hours_start: int
+    hours_end: int
+    duration: int
     routine: str
-    categories: Dict[str, List[str]]
+    categories: Dict[str, List[str]] # TODO: could be List[str] or object with options and duration
 
     @staticmethod
     def load():
@@ -46,9 +46,9 @@ class Config:
 
         return Config(
             cooldown=cooldown,
-            workout_hours_start=config['workout_hours']['start'],
-            workout_hours_end=config['workout_hours']['end'],
-            exercise_duration=config['exercise_duration'],
+            hours_start=config['hours']['start'],
+            hours_end=config['hours']['end'],
+            duration=config['duration'],
             routine=config['routine'],
             categories=config['categories'])
 
@@ -144,7 +144,7 @@ def main():
         return
 
     current_hour = datetime.now().hour
-    if current_hour < config.workout_hours_start or current_hour >= config.workout_hours_end:
+    if current_hour < config.hours_start or current_hour >= config.hours_end:
         print("off hours")
         return
 
@@ -181,7 +181,7 @@ def main():
             print('Skipping this time.')
             return
         elif (value == 'y' or value == '1'):
-            duration = config.exercise_duration
+            duration = config.duration
 
             speak_text(f"Starting in 10 seconds")
             sleep(5)
@@ -192,15 +192,16 @@ def main():
             speak_text("One")
             speak_text("Go")
 
-            if (duration >= 45):
+            if (duration > 30):
                 sleep(duration - 30)
                 speak_text("Thirty seconds remaining")
+
+            if (duration > 15):
+                sleep(duration - 15)
+                speak_text("Fifteen seconds remaining")
                 sleep(15)
             else:
-                sleep(duration - 15)
-
-            speak_text("Fifteen seconds remaining")
-            sleep(15)
+                sleep(duration)
 
             speak_text("Time's up")
 
@@ -212,7 +213,7 @@ def main():
                         routine.record(state, category, exercise, reps)
                         log.record(category, exercise, reps)
                         state.save()
-                        previous_sets = log.previous_sets()
+                        previous_sets = log.previous_sets(exercise)
                         print("")
                         print(f'{exercise} history')
                         for set in previous_sets:
@@ -246,7 +247,7 @@ def speak_text(text):
     if system == "Darwin":  # macOS
         subprocess.run(["say", text])
 
-    elif system == "Windows":  # Windows
+    elif system == "Windows":
         subprocess.run([
             "powershell",
             "-Command",
@@ -254,7 +255,7 @@ def speak_text(text):
             f"(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('{text}')"
         ])
 
-    elif system == "Linux":  # Linux
+    elif system == "Linux":
         subprocess.run(["espeak", text])
 
 if __name__ == "__main__":

@@ -4,17 +4,16 @@
     "hours": 0,
     "minutes": 60
   },
-  "workout_hours": {
+  "hours": {
     "start": 9,
     "end": 18
   },
-  "exercise_duration": 30,
+  "duration": 30,
   "routine": "RandomCycle",
   "categories": {
     "chest": [
       "push ups",
-      "dips",
-      "bench presses"
+      "dips"
     ],
     "legs": [
       "squats",
@@ -23,12 +22,10 @@
     ],
     "back": [
       "pull ups",
-      "chin ups",
-      "rows"
+      "chin ups"
     ],
     "core": [
       "plank",
-      "bridge",
       "crunches",
       "leg raises"
     ],
@@ -38,9 +35,9 @@
       "high knees"
     ],
     "stretches": [
-      "toe touches",
-      "down dog",
-      "child's pose"
+        "toe touches",
+        "down dog",
+        "child's pose"
     ]
   }
 }
