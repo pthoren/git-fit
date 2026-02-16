@@ -245,7 +245,7 @@ def speak_text(text):
     print(text)
 
     if system == "Darwin":  # macOS
-        subprocess.run(["say", text])
+        subprocess.run(["say", "-v", "alex", text])
 
     elif system == "Windows":
         subprocess.run([
