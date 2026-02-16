@@ -13,7 +13,9 @@ echo "Running pre-commit hook"
 sh "$DIR/run-local-hook" pre-commit
 
 # TODO check if this works from vscode commit pane
-exec >/dev/tty 2>/dev/tty </dev/tty
-cd "$DIR"
-cd ..
-python3 git_fit.py
+if [ -e /dev/tty ]; then
+  exec >/dev/tty 2>/dev/tty </dev/tty
+  cd "$DIR"
+  cd ..
+  python3 git_fit.py
+fi
