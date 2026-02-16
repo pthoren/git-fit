@@ -127,6 +127,8 @@ class State:
             return State(remaining_categories=list(config.categories.keys()), remaining_exercises=config.categories)
 
 class Routine(ABC):
+    timed: bool = True
+
     @abstractmethod
     def next_exercise(self, config: Config, state: State, skipped_categories: List[str], skipped_exercises: List[str], category: str = None) -> str:  pass
 
@@ -181,8 +183,6 @@ def main():
             print('Skipping this time.')
             return
         elif (value == 'y' or value == '1'):
-            duration = config.duration
-
             speak_text(f"Starting in 10 seconds")
             sleep(5)
             speak_text("Five")
@@ -192,18 +192,21 @@ def main():
             speak_text("One")
             speak_text("Go")
 
-            if (duration > 30):
-                sleep(duration - 30)
-                speak_text("Thirty seconds remaining")
+            if routine.timed:
+                duration = config.duration
 
-            if (duration > 15):
-                sleep(duration - 15)
-                speak_text("Fifteen seconds remaining")
-                sleep(15)
-            else:
-                sleep(duration)
+                if (duration > 30):
+                    sleep(duration - 30)
+                    speak_text("Thirty seconds remaining")
 
-            speak_text("Time's up")
+                if (duration > 15):
+                    sleep(duration - 15)
+                    speak_text("Fifteen seconds remaining")
+                    sleep(15)
+                else:
+                    sleep(duration)
+
+                speak_text("Time's up")
 
             while True:
                 value = input("How many reps did you do?: ").lower()
